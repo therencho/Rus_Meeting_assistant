@@ -1,11 +1,11 @@
-from prompts import TASK_EXTRACTION_PROMPT
+from prompts import COMMUNICATION_INTENT_PROMPT
 from utils.gemini_helper import generate_response
 from utils.json_cleaner import parse_json_response
 
-def extract_tasks(transcript):
+def extract_communication_intents(transcript):
 
     response = generate_response(
-        TASK_EXTRACTION_PROMPT + transcript
+        COMMUNICATION_INTENT_PROMPT + transcript
     )
 
     return parse_json_response(response)
