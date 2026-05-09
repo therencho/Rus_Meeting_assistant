@@ -28,7 +28,7 @@ Return ONLY valid JSON in this format:
 
 Transcript:
 """
-RISK_ANALYSIS_PROMPT = OPERATIONAL_RISK_PROMPT = """
+RISK_ANALYSIS_PROMPT = """
 You are an AI operational risk analyzer for business meetings.
 
 Identify ONLY significant operational risks that are clearly supported by the transcript.
@@ -221,12 +221,15 @@ IMPORTANT:
 Return ONLY raw JSON.
 Do not wrap the response in markdown.
 
+Return a concise professional meeting title
+based on the primary discussion topic. (Max 100 characters)
+
 Return ONLY valid JSON in this format:
 
 {
+  "meeting_title": "",
   "summary": ""
 }
-
 Transcript:
 """
 
