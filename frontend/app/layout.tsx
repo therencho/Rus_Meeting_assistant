@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rus - Meeting Assistant",
-  description: "Rus is an AI meeting intelligence platform that transforms your meeting transcripts into actionable insights, summaries, and next steps. Powered by advanced AI, Rus helps you stay organized, informed, and productive after every meeting.",
+  title: "Rus-Meeting Assistant",
+  description: "A meeting assistant that helps you to manage your meetings and tasks.",
 };
 
 export default function RootLayout({
