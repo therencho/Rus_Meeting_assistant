@@ -1,6 +1,6 @@
-from Backend.prompts import COMMUNICATION_INTENT_PROMPT
-from Backend.utils.gemini_helper import generate_response
-from Backend.utils.json_cleaner import parse_json_response
+from prompts import COMMUNICATION_INTENT_PROMPT
+from utils.gemini_helper import generate_response
+from utils.json_cleaner import parse_json_response
 
 def extract_communication_intents(transcript):
 

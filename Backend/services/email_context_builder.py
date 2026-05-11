@@ -1,8 +1,8 @@
 import json
 
-from Backend.prompts import EMAIL_CONTEXT_PROMPT
-from Backend.utils.gemini_helper import generate_response
-from Backend.utils.json_cleaner import parse_json_response
+from prompts import EMAIL_CONTEXT_PROMPT
+from utils.gemini_helper import generate_response
+from utils.json_cleaner import parse_json_response
 
 
 def build_email_contexts(meeting_context):

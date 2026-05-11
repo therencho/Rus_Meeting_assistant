@@ -1,6 +1,6 @@
-from Backend.prompts import RISK_ANALYSIS_PROMPT
-from Backend.utils.gemini_helper import generate_response
-from Backend.utils.json_cleaner import parse_json_response
+from prompts import RISK_ANALYSIS_PROMPT
+from utils.gemini_helper import generate_response
+from utils.json_cleaner import parse_json_response
 
 def analyze_risks(transcript):
 

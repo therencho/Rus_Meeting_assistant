@@ -1,6 +1,6 @@
 import time
 from google import genai
-from Backend.config import MODEL_NAME
+from config import MODEL_NAME
 
 client = genai.Client()
 
