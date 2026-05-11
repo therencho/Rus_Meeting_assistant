@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from utils.retrieval import (
+from Backend.utils.retrieval import (
     load_meeting,
     list_meetings
 )
-from analyzer import analyzing_pipeline
+from Backend.analyzer import analyzing_pipeline
 
 app = FastAPI()
 
