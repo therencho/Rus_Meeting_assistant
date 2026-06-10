@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from services.extractor import extract_tasks
 from services.execution_gap import (
     extract_execution_gaps
@@ -25,66 +27,61 @@ from utils.storage import save_meeting
 
 def analyzing_pipeline(transcript):
 
-    print("Starting task extraction...")
-    tasks = extract_tasks(transcript)
-    print("Tasks extracted.")
+    # Stage 1: all 5 independent Gemini calls in parallel
+    print("Starting parallel extraction (tasks, gaps, risks, intents, summary)...")
 
-    print("Starting execution gaps...")
-    execution_gaps = extract_execution_gaps(
-        transcript
-    )
-    print("Execution gaps extracted.")
+    stage1 = {
+        "tasks":                  extract_tasks,
+        "execution_gaps":         extract_execution_gaps,
+        "operational_risks":      analyze_risks,
+        "communication_intents":  extract_communication_intents,
+        "summary":                generate_summary,
+    }
 
-    print("Starting risk analysis...")
-    operational_risks = analyze_risks(
-        transcript
-    )
-    print("Risks extracted.")
+    results = {}
 
-    print("Starting communication intents...")
-    communication_intents = (
-        extract_communication_intents(
-            transcript
-        )
-    )
-    print("Communication intents extracted.")
+    with ThreadPoolExecutor(max_workers=5) as executor:
 
-    print("Starting summary generation...")
-    summary = generate_summary(transcript)
-    print("Summary generated.")
+        futures = {
+            executor.submit(fn, transcript): key
+            for key, fn in stage1.items()
+        }
 
+        for future in as_completed(futures):
+            key = futures[future]
+            results[key] = future.result()
+            print(f"{key} done.")
+
+    tasks                 = results["tasks"]
+    execution_gaps        = results["execution_gaps"]
+    operational_risks     = results["operational_risks"]
+    communication_intents = results["communication_intents"]
+    summary               = results["summary"]
+
+    # Stage 2: email contexts depend on stage 1
     print("Building meeting context...")
     meeting_context = consolidate_meeting_data(
-
         tasks,
         execution_gaps,
         operational_risks,
         communication_intents
     )
-    print("Meeting context built.")
 
     print("Building email contexts...")
-    email_contexts = build_email_contexts(
-        meeting_context
-    )
+    email_contexts = build_email_contexts(meeting_context)
     print("Email contexts built.")
 
+    # Stage 3: final consolidation + save
     print("Building final meeting data...")
-    final_meeting_data = (
-        consolidate_meeting_data(
-
-            tasks,
-            execution_gaps,
-            operational_risks,
-            communication_intents,
-
-            summary=summary,
-            email_contexts=email_contexts,
-
-            final=True
-        )
+    final_meeting_data = consolidate_meeting_data(
+        tasks,
+        execution_gaps,
+        operational_risks,
+        communication_intents,
+        summary=summary,
+        email_contexts=email_contexts,
+        final=True
     )
-    print("Final meeting data built.")
 
     print("Saving meeting...")
     meeting_id = save_meeting(

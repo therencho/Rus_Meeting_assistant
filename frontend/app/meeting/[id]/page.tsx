@@ -66,9 +66,14 @@ export default function MeetingDashboard() {
     setLoading] =
     useState(true);
 
+  type GeneratedEmail = {
+    subject: string;
+    body: string;
+  };
+
   const [generatedEmails,
     setGeneratedEmails] =
-    useState<Record<number, boolean>>(
+    useState<Record<number, GeneratedEmail>>(
       {}
     );
 
@@ -852,7 +857,7 @@ export default function MeetingDashboard() {
 
                     <button
 
-                      onClick={() => {
+                      onClick={async () => {
 
                         setLoadingEmails(
                           (prev) => ({
@@ -861,7 +866,45 @@ export default function MeetingDashboard() {
                           })
                         );
 
-                        setTimeout(() => {
+                        try {
+
+                          const res = await fetch(
+                            "http://127.0.0.1:8000/generate-email",
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                meeting_id: meetingId,
+                                category: context.category,
+                                audience: context.audience,
+                                email_context: context.email_context,
+                              }),
+                            }
+                          );
+
+                          const data = await res.json();
+
+                          if (data.status === "success") {
+
+                            setGeneratedEmails(
+                              (prev) => ({
+                                ...prev,
+                                [idx]: {
+                                  subject: data.subject,
+                                  body: data.body,
+                                },
+                              })
+                            );
+
+                          }
+
+                        } catch (err) {
+
+                          console.error(err);
+
+                        } finally {
 
                           setLoadingEmails(
                             (prev) => ({
@@ -870,19 +913,16 @@ export default function MeetingDashboard() {
                             })
                           );
 
-                          setGeneratedEmails(
-                            (prev) => ({
-                              ...prev,
-                              [idx]: true,
-                            })
-                          );
-
-                        }, 2000);
+                        }
                       }}
+
+                      disabled={loadingEmails[idx]}
 
                       className="
                         bg-white/5
                         hover:bg-white/10
+                        disabled:opacity-50
+                        disabled:cursor-not-allowed
                         border
                         border-white/10
                         rounded-xl
@@ -949,11 +989,24 @@ export default function MeetingDashboard() {
                         className="
                           text-sm
                           text-gray-500
-                          mb-4
+                          mb-1
                         "
                       >
 
                         Generated Email
+
+                      </div>
+
+                      <div
+                        className="
+                          text-white
+                          font-medium
+                          text-sm
+                          mb-4
+                        "
+                      >
+
+                        {generatedEmails[idx].subject}
 
                       </div>
 
@@ -966,38 +1019,11 @@ export default function MeetingDashboard() {
                           p-5
                           text-gray-300
                           leading-relaxed
+                          whitespace-pre-wrap
                         "
                       >
 
-                        Dear Ceo,
-                        <br /><br />
-
-                    
-
-I wanted to provide a quick update on the enterprise onboarding workflow rollout ahead of the upcoming leadership review.
-<br /><br />
-At present, there are several critical blockers requiring immediate attention:
-<br />
-* Final compliance approval for the revised workflow is still pending, and the current coordination status remains unclear.
-<br />
-* The analytics dashboard requires urgent review due to inconsistencies in the reporting logic.
-<br />
-* The staging server has experienced multiple crashes recently, raising stability concerns that need resolution before the next release cycle.
-<br />
-* Marketing’s customer communication draft has not yet been finalized.
-<br />
-* Consolidated pilot customer feedback is still pending and is expected to be discussed during Monday’s sync.
-<br /><br />
-
-Given the dependencies across teams, timely resolution of these issues will be important to keep the rollout on track and ensure readiness for the leadership review.
-<br /><br />
-
-Please let me know if you would like a more detailed breakdown of ownership, timelines, or mitigation plans for any of the above items.
-                        <br /><br />
-
-                        Regards,
-                        <br />
-                        Rencho
+                        {generatedEmails[idx].body}
 
                       </div>
 
@@ -1010,6 +1036,11 @@ Please let me know if you would like a more detailed breakdown of ownership, tim
                       >
 
                         <button
+                          onClick={() =>
+                            navigator.clipboard.writeText(
+                              `Subject: ${generatedEmails[idx].subject}\n\n${generatedEmails[idx].body}`
+                            )
+                          }
                           className="
                             bg-white/5
                             hover:bg-white/10
@@ -1024,24 +1055,6 @@ Please let me know if you would like a more detailed breakdown of ownership, tim
                         >
 
                           Copy
-
-                        </button>
-
-                        <button
-                          className="
-                            bg-blue-500/20
-                            hover:bg-blue-500/30
-                            border
-                            border-blue-500/20
-                            rounded-xl
-                            px-4
-                            py-2
-                            text-sm
-                            transition-all
-                          "
-                        >
-
-                          Send
 
                         </button>
 

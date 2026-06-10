@@ -5,11 +5,13 @@ load_dotenv()
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List
 from utils.retrieval import (
     load_meeting,
     list_meetings
 )
 from analyzer import analyzing_pipeline
+from services.email_generator import generate_email
 
 app = FastAPI()
 app.add_middleware(
@@ -29,6 +31,13 @@ app.add_middleware(
 
 class TranscriptRequest(BaseModel):
     transcript: str
+
+
+class EmailRequest(BaseModel):
+    meeting_id: str
+    category: str
+    audience: str
+    email_context: List[str]
 
 
 @app.post("/analyze")
@@ -72,17 +81,29 @@ def get_meeting(meeting_id: str):
             "status": "error",
             "message": str(e)
         }
-    
-@app.get("/meeting/{meeting_id}")
-def get_meeting(meeting_id: str):
+
+
+@app.post("/generate-email")
+def generate_email_endpoint(data: EmailRequest):
 
     try:
 
         meeting_data = load_meeting(
-            meeting_id
+            data.meeting_id
         )
 
-        return meeting_data
+        result = generate_email(
+            meeting_data,
+            data.category,
+            data.audience,
+            data.email_context
+        )
+
+        return {
+            "status": "success",
+            "subject": result.get("subject", ""),
+            "body": result.get("body", "")
+        }
 
     except Exception as e:
 
@@ -92,7 +113,8 @@ def get_meeting(meeting_id: str):
             "status": "error",
             "message": str(e)
         }
-    
+
+
 @app.get("/meetings")
 def get_meetings():
 
