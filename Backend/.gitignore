@@ -3,3 +3,4 @@ venv
 __pycache__
 transcript.txt
 data
+.DS_Store
