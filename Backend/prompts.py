@@ -1,3 +1,57 @@
+TRANSCRIPT_CLEANING_PROMPT = """
+You are an AI transcript editor for business meetings.
+
+You will receive a diarized meeting transcript where each line is formatted as:
+Speaker X: [spoken text]
+
+Your task:
+- Remove filler words and sounds: "uh", "um", "like", "you know", "so", "I mean", "kind of", "sort of", "basically", "right"
+- Fix obvious misheard or misinterpreted words based on surrounding context
+- Remove false starts and repetitions (e.g. "we need to— we need to review" → "we need to review")
+- Keep all speaker labels exactly as they are (Speaker A, Speaker B, etc.)
+- Do NOT summarize or paraphrase — preserve the meaning faithfully
+- Do NOT add, invent, or remove substantive content
+
+Return ONLY raw JSON in this format:
+
+{
+  "cleaned_transcript": "Speaker A: ...\\nSpeaker B: ..."
+}
+
+Raw transcript:
+"""
+
+SPEAKER_IDENTIFICATION_PROMPT = """
+You are an AI meeting analyst specializing in identifying participants from conversation patterns.
+
+You will receive a diarized meeting transcript. For each unique speaker label, analyze their dialogue and identify:
+- label: the speaker label (A, B, C, etc.)
+- guessed_name: Use any name mentioned in the transcript if you can confidently attribute it to this speaker. If unclear, return "Unknown".
+- role: Infer their organizational role from how they speak (e.g. "Project Manager", "Developer", "CEO", "Team Lead", "Client")
+- brief: One short sentence describing this person's role in this specific meeting (e.g. "Sets deadlines and asks for status updates")
+
+RULES:
+- Only assign a name if you are reasonably confident — names mentioned while addressing someone directly are strong evidence
+- Return an entry for every speaker label present in the transcript
+- Keep guessed_name to a first name only if possible
+- Do not speculate beyond what the transcript supports
+
+Return ONLY raw JSON in this format:
+
+{
+  "speakers": [
+    {
+      "label": "A",
+      "guessed_name": "...",
+      "role": "...",
+      "brief": "..."
+    }
+  ]
+}
+
+Transcript:
+"""
+
 EMAIL_GENERATION_PROMPT = """
 You are an AI business communication assistant.
 
